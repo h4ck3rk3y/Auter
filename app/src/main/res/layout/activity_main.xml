@@ -7,7 +7,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="SignUp"
-        android:id="@+id/signup"
+        android:id="@+id/sign"
         android:layout_gravity="center_horizontal|bottom" />
 
     <TextView
