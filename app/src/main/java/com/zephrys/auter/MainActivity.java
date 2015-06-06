@@ -13,10 +13,31 @@ import android.os.Build;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.protocol.HTTP;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -24,25 +45,45 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        TextView aadhar = (TextView) findViewById(R.id.aadhar);
-        TextView first_name = (TextView) findViewById(R.id.fname);
-        TextView last_name = (TextView) findViewById(R.id.lname);
-        TextView gender = (TextView) findViewById(R.id.gender);
-        TextView dob = (TextView) findViewById(R.id.dob);
-        TextView dobt = (TextView) findViewById(R.id.dobt);
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-        String timeString = sdf.format(c.getTime());
-
-
-        String init = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<Auth uid=”+aadhar+” tid=”public” ac=”public” sa=”ac” ver=”1.5” lk=”MKHmkuz-MgLYvA54PbwZdo9eC3D5y7SVozWwpNgEPysVqLs_aJgAVOI”>\n <Skey ci=”20170227”>encrypted and encoded session key</Skey>\n <Uses pi=”y” pa=”n” pfa=”n” bio=”n” pin=”n” otp=”n”/>\n <Data>encrypted and then encoded block</Data>\n <Hmac>SHA-256 Hash of Pid XML, encrypted and then encoded</Hmac>\n <Signature>Digital signature of AUA</Signature>\n</Auth>\n"
-        String pid = '<Pid ts=”” ver=””>\n <Meta fdc=”” idc=”” apc=””>\n <Locn lat=”” lng=”” vtc=”” subdist=”” dist=”” state=”” pc=””/>\n </Meta>\n <Demo lang=””>\n <Pi ms=”E|P” mv=”” name=”” lname=”” lmv=”” gender=”M|F|T” dob=””\ndobt=”V|D|A” age=”” phone=”” email=””/>\n <Pa ms=”E” co=”” house=”” street=”” lm=”” loc=”” \n vtc=”” subdist=”” dist=”” state=”” pc=”” po=””/>\n <Pfa ms=”E|P” mv=”” av=”” lav=”” lmv=””/>\n </Demo>\n <Bios>\n <Bio type=”FMR|FIR|IIR” posh=””>encoded biometric</Bio>\n </Bios>\n <Pv otp=”” pin=””/>\n</Pid>'
 
         Button b1 = (Button) findViewById(R.id.signup);
 
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //get the various required fields
+                String aadhar = (String) ((TextView) findViewById(R.id.aadhar)).getText();
+                String first_name = (String) ((TextView) findViewById(R.id.fname)).getText();
+//                String last_name = (String) ((TextView) findViewById(R.id.lname)).getText();
+                String gender = (String) ((TextView) findViewById(R.id.gender)).getText();
+                String dob = (String) ((TextView) findViewById(R.id.dob)).getText();
+
+                String son1 = String.format("{ \"aadhaar-id\": \"%s\", \"device-id\": \"Zephyr\", \"modality\": \"demo\", \"certificate-type\": \"preprod\", \"demographics\": { \"name\": { \"matching-strategy\": \"P\",\n      \"matching-value\": \"56\",\"name-value\": \"%s\" } , \"dob\": {\n      \"format\": \"YYYY-MM-DD\",\n      \"dob-type\": \"V\",\n      \"dob-value\": \"%s\"\n    }, \"gender\" : \"%s\"}, \"location\": { \"type\": \"gps\", \"latitude\": \"22.3\", \"longitude\": \"73.2\", \"altitude\": \"0\" } }", aadhar, first_name, dob, gender);
+//                Calendar c = Calendar.getInstance();
+//                SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+//                String timeString = f.format(c.getTime());
+
+                HttpClient client = new DefaultHttpClient();
+                HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
+                HttpResponse response;
+//                JSONObject json = new JSONObject();
+
+                try {
+                    HttpPost post = new HttpPost("https://ac.khoslalabs.com/hackgate/hackathon/auth/raw HTTP/1.1");
+                    StringEntity se = new StringEntity(son1);
+                    se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                    post.setEntity(se);
+                    response = client.execute(post);
+
+                    /*Checking response */
+                    if(response!=null){
+                        InputStream in = response.getEntity().getContent(); //Get the data in the entity
+                    }
+
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+
 
             }
         });
